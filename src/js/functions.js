@@ -1,12 +1,14 @@
-
 const xlsx = require('xlsx')
 const path = require('path')
+const kwitansi = require('../../no_kwitansi.json')
+const fs = require('fs')
+
 
 // EDIT NILAI no_kwitansi.json
 async function nomerKwitansi () {
     kwitansi.no_kwitansi += await 1
     try {
-        await fs.writeFile('./no_kwitansi.json', JSON.stringify(kwitansi), async function (e) {
+        await fs.writeFile('../../no_kwitansi.json', JSON.stringify(kwitansi), async function (e) {
             if (e) {
                 return await console.log(e)
             }

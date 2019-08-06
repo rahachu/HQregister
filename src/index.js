@@ -1,7 +1,6 @@
 const path = require('path')
 const express = require('express')
 require('./db/mongoose')
-const xlsx = require('xlsx') // Entar
 const hbs = require('hbs')
 const app = express()
 const fs = require('fs')
@@ -28,27 +27,7 @@ const Tower = require('../src/models/tower')
 // const ExcelData = require('../src/models/exceldata')
 const kwitansi = require('../no_kwitansi.json')
 
-// var wb = xlsx.readFile('./public/excel-file/Financial-Sample.xlsx')
-// var ws = wb.Sheets['Sheet1']
-
-// var json_data = xlsx.utils.sheet_to_json(ws)
-
-// json_data.map((record) => {
-// })
-
-async function nomerKwitansi () {
-    kwitansi.no_kwitansi += await 1
-    try {
-        await fs.writeFile('./no_kwitansi.json', JSON.stringify(kwitansi), async function (e) {
-            if (e) {
-                return await console.log(e)
-            }
-        })
-    } catch (e) {
-        await console.log(e)
-    }
-    await console.log(kwitansi.no_kwitansi)
-}
+const {nomerKwitansi, bikinFileExcel} = require('./js/functions')
 
 // ~~~~~~~~ USERS ROUTER ~~~~~~~~ //
 
@@ -62,8 +41,6 @@ app.post('/users/create', async (req, res) => {
         console.log(kwitansi)
         nomerKwitansi().then(() => {
             console.log(kwitansi)
-            
-
             user.save()
         })
         res.send(user)
