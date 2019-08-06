@@ -39,7 +39,7 @@ async function bikinFileExcel (nama_lengkap, no_kwitansi, tanggal, tower, lantai
         record.NO_KWT = no_kwitansi
         return record
     })
-    
+
     var nama_dengan_strip = nama_lengkap.replace(/ /g, '-')
     var tanggal_sekarang = new Date()
     var bulan_sekarang = tanggal_sekarang.getMonth() + 1
