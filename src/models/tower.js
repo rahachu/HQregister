@@ -28,6 +28,7 @@ const towerSchema = mongoose.Schema({
 towerSchema.statics.findByCredentials = async (tower, lantai) => {
     const tower_cari = await Tower.findOne({tower, lantai})
     if (!tower_cari) {
+        console.log(tower_cari)
         throw new Error('Tempat tidak tersedia')
     }
     if (tower_cari.terjual === true) {

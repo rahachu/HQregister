@@ -39,15 +39,15 @@ const kwitansi = require('../no_kwitansi.json')
 async function nomerKwitansi () {
     kwitansi.no_kwitansi += await 1
     try {
-        await fs.writeFile('./no_kwitansi.json', JSON.stringify(kwitansi), async function (e) {
+        var kwitansi_dir = path.join(__dirname, '../no_kwitansi.json')
+        await fs.writeFile(kwitansi_dir, JSON.stringify(kwitansi), function (e) {
             if (e) {
-                return await console.log(e)
+                throw new Error(e)
             }
         })
     } catch (e) {
-        await console.log(e)
+        console.log(e)
     }
-    await console.log(kwitansi.no_kwitansi)
 }
 
 async function bikinFileExcel (nama_lengkap, no_kwitansi, tanggal, tower, lantai, harga_tower) {
@@ -81,10 +81,23 @@ async function bikinFileExcel (nama_lengkap, no_kwitansi, tanggal, tower, lantai
         var newWS = xlsx.utils.json_to_sheet(json_new_temp)
         xlsx.utils.book_append_sheet(newWB, newWS, 'Sheet1')
         const dir = path.join(__dirname, '../public/excel-file/' + nama_dengan_strip + '_' + tanggal_sekarang.getDate() + '-' + bulan_sekarang + '-' + tanggal_sekarang.getFullYear() + '_' + tower + '_' + lantai + '.xlsx')
-        console.log(dir)
+        
+        // console.log(dir)
+
+        
         xlsx.writeFile(newWB, dir)
     } catch (e) {
         throw new Error(e)
+    }
+}
+
+async function cekTower (tower) {
+    if (tower.terjual || !tower) {
+        throw new Error ('Lahan tidak tersedia')
+    } else {
+        tower.terjual = true
+        tower.statistik_terjual += 1
+        return tower
     }
 }
 
@@ -96,26 +109,42 @@ app.get('/users', async (req, res) => {
 
 app.post('/users/create', async (req, res) => {
     const user = new User(req.body)
-    async function wrapperFunc (req, kwitansi) {
-        try {
-            // console.log(req.body)
-            // console.log(kwitansi) 
-            const tower = await Tower.findByCredentials(req.body.tower, req.body.lantai)
-            // console.log(tower.harga)
-            bikinFileExcel(req.body.nama_lengkap, kwitansi.no_kwitansi, req.body.tanggal_sewa, req.body.tower, req.body.lantai, tower.harga)
-        } catch (error) {
-            throw new Error(error)
-        }
+    // async function wrapperFunc (req, kwitansi) {
+    //     try {
+    //         // console.log(req.body)
+    //         // console.log(kwitansi) 
+    //         const tower = await Tower.findByCredentials(req.body.tower, req.body.lantai)
+    //         // console.log(tower.harga)
+    //         await bikinFileExcel(req.body.nama_lengkap, kwitansi.no_kwitansi, req.body.tanggal_sewa, req.body.tower, req.body.lantai, tower.harga)
+    //     } catch (error) {
+    //         throw new Error(error)
+    //     }
+    // }
+    // console.log(kwitansi)
+    // nomerKwitansi().then(() => {
+    //     console.log(kwitansi)
+    //     wrapperFunc(req, kwitansi)
+    //     user.save()
+    //     res.send(user)
+    // }).catch((e) => {
+    //     res.send(e)
+    // })
+
+    try {
+        await nomerKwitansi()
+        const tower = await Tower.findOne({tower : req.body.tower, lantai : req.body.lantai})
+        await cekTower(tower)
+        await console.log(kwitansi)
+        await tower.save()
+        await user.save()
+        await bikinFileExcel(req.body.nama_lengkap, kwitansi.no_kwitansi, req.body.tanggal_sewa, req.body.tower, req.body.lantai, tower.harga)
+        await res.send(user)
+    } catch (error) {
+        console.log(error)
+        await res.send({
+            Error : 'Lahan tidak tersedia, atau error internal'
+        })
     }
-    console.log(kwitansi)
-    nomerKwitansi().then(() => {
-        console.log(kwitansi)
-        wrapperFunc(req, kwitansi)
-        user.save()
-        res.send(user)
-    }).catch((e) => {
-        res.send(e)
-    })
     
 })
 
