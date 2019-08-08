@@ -55,14 +55,15 @@ async function bikinFileExcel (nama_lengkap, no_kwitansi, tanggal, tower, lantai
         // console.log(tanggal)
         var bulan = Number(0)
         var readDir = path.join(__dirname, '../public/excel-file/osjur.xlsx')
-        console.log(readDir)
-
+        // console.log(readDir)
+        console.log(tanggal)
         var temp_osjur = xlsx.readFile(readDir)
         var temp_osjur = temp_osjur.Sheets['Sheet1']
         var json_temp = xlsx.utils.sheet_to_json(temp_osjur)
-        
+
         var json_new_temp = json_temp.map((record) => {
             var date_ = new Date(tanggal.split('/')[2], tanggal.split('/')[1] - 1, tanggal.split('/')[0] - 30)
+            // console.log(date_)
             date_.setMonth(date_.getMonth() + bulan)
             var month = date_.getMonth() + 1
             bulan += 1
@@ -74,8 +75,10 @@ async function bikinFileExcel (nama_lengkap, no_kwitansi, tanggal, tower, lantai
         })
 
         var nama_dengan_strip = nama_lengkap.replace(/ /g, '-')
-        var tanggal_sekarang = new Date()
+        var tanggal_sekarang = new Date(tanggal.split('/')[2], tanggal.split('/')[1] - 1, tanggal.split('/')[0] - 30)
         var bulan_sekarang = tanggal_sekarang.getMonth() + 1
+
+        console.log(tanggal_sekarang.getDate() + '-' + bulan_sekarang + '-' + tanggal_sekarang.getFullYear() + '_' + tower + '_' + lantai)
 
         var newWB = xlsx.utils.book_new()
         var newWS = xlsx.utils.json_to_sheet(json_new_temp)
@@ -87,6 +90,7 @@ async function bikinFileExcel (nama_lengkap, no_kwitansi, tanggal, tower, lantai
         
         xlsx.writeFile(newWB, dir)
     } catch (e) {
+        console.log(e)
         throw new Error(e)
     }
 }
@@ -109,40 +113,21 @@ app.get('/users', async (req, res) => {
 
 app.post('/users/create', async (req, res) => {
     const user = new User(req.body)
-    // async function wrapperFunc (req, kwitansi) {
-    //     try {
-    //         // console.log(req.body)
-    //         // console.log(kwitansi) 
-    //         const tower = await Tower.findByCredentials(req.body.tower, req.body.lantai)
-    //         // console.log(tower.harga)
-    //         await bikinFileExcel(req.body.nama_lengkap, kwitansi.no_kwitansi, req.body.tanggal_sewa, req.body.tower, req.body.lantai, tower.harga)
-    //     } catch (error) {
-    //         throw new Error(error)
-    //     }
-    // }
-    // console.log(kwitansi)
-    // nomerKwitansi().then(() => {
-    //     console.log(kwitansi)
-    //     wrapperFunc(req, kwitansi)
-    //     user.save()
-    //     res.send(user)
-    // }).catch((e) => {
-    //     res.send(e)
-    // })
 
     try {
         await nomerKwitansi()
         const tower = await Tower.findOne({tower : req.body.tower, lantai : req.body.lantai})
         await cekTower(tower)
         await console.log(kwitansi)
+        await bikinFileExcel(req.body.nama_lengkap, kwitansi.no_kwitansi, req.body.tanggal_sewa, req.body.tower, req.body.lantai, tower.harga)
         await tower.save()
         await user.save()
-        await bikinFileExcel(req.body.nama_lengkap, kwitansi.no_kwitansi, req.body.tanggal_sewa, req.body.tower, req.body.lantai, tower.harga)
         await res.send(user)
     } catch (error) {
-        console.log(error)
+        let message = error
+        await console.log(typeof(message))
         await res.send({
-            Error : 'Lahan tidak tersedia, atau error internal'
+            message : 'Lahan tidak tersedia atau error internal server'
         })
     }
     
@@ -178,7 +163,7 @@ app.get('/excel', (req,res) => {
 
 // ~~~~~~~ SERVER UP ~~~~~~~ //
 app.get('', async (req, res) => {
-    res.send('Connected')
+    res.render('index')
 })
 
 app.listen(port, () => {

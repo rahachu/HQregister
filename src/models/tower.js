@@ -15,12 +15,12 @@ const towerSchema = mongoose.Schema({
     },
     terjual : {
         type : Boolean,
-        required : false,
+        required : true,
         default : false
     },
     statistik_terjual : {
         type : Number,
-        required : false,
+        required : true,
         default : 0
     }
 })
