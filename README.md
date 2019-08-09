@@ -101,7 +101,7 @@ Kami menggunakan [github](https://github.com/) untuk membantu version control. D
 * **Muhammad Farid Adilazuarda** - [FaridLazuada](https://github.com/faridlazuarda)
 * **Kanisius Sosrodimardito** - [ditososro](https://github.com/ditososro)
 * **Naomi Yolanda Bernadetta** - [nnaaooo](https://github.com/nnaaooo)
-* **Iqbal Naufal**
+* **Iqbal Naufal** - [iqbaln11](https://github.com/iqbaln11)
 * **Garin Ichsan Nugraha** - [94gin](https://github.com/94gin)
 
 ## License
