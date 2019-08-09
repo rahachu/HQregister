@@ -105,7 +105,6 @@ Kami menggunakan [github](https://github.com/) untuk membantu version control. D
 * **Garin Ichsan Nugraha** - [94gin](https://github.com/94gin)
 
 ## License
-[ Insert details ]
 
 ## Acknowledgements
 Many thanks to
