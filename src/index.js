@@ -52,7 +52,7 @@ async function bikinFileExcel (nama_lengkap, no_kwitansi, tanggal, tower, lantai
         var json_temp = xlsx.utils.sheet_to_json(temp_osjur)
 
         var json_new_temp = json_temp.map((record) => {
-            var date_ = new Date(tanggal.split('/')[2], tanggal.split('/')[1] - 1, tanggal.split('/')[0] - 30)
+            var date_ = new Date(tanggal.split('/')[2], tanggal.split('/')[1] - 1, tanggal.split('/')[0] - 32)
             // console.log(date_)
             date_.setMonth(date_.getMonth() + bulan)
             var month = date_.getMonth() + 1
@@ -112,24 +112,23 @@ app.post('/users/create', async (req, res) => {
         await cekTower(tower)
         await console.log(kwitansi)
         let nama_strip = req.body.nama_lengkap.replace(/ /g, '-')
-        let tanggal_sekarang = new Date(req.body.tanggal_sewa.split('/')[2], req.body.tanggal_sewa.split('/')[1], req.body.tanggal_sewa.split('/')[0] - 30)
- 
+        // console.log(req.body.tanggal_sewa.split('/')[2])
+        let tanggal_sekarang = new Date(req.body.tanggal_sewa.split('/')[2], req.body.tanggal_sewa.split('/')[1], req.body.tanggal_sewa.split('/')[0] - 31)
         let month1 = await tanggal_sekarang.getMonth()+1
-        let tanggal1_ = await tanggal_sekarang.getDate() + '/' + month1 + '/' + tanggal_sekarang.getYear()
+        let tanggal1_ = await tanggal_sekarang.getDate() + '/' + month1 + '/' + tanggal_sekarang.getFullYear()
         await tanggal_sekarang.setMonth(tanggal_sekarang.getMonth() + 1)
         let month2 = await tanggal_sekarang.getMonth()+1
-        let tanggal2_ = await tanggal_sekarang.getDate() + '/' + month2 + '/' +  tanggal_sekarang.getYear()
+        let tanggal2_ = await tanggal_sekarang.getDate() + '/' + month2 + '/' +  tanggal_sekarang.getFullYear()
         await tanggal_sekarang.setMonth(tanggal_sekarang.getMonth() + 1)
         let month3 = await tanggal_sekarang.getMonth()+1
-        let tanggal3_ = await tanggal_sekarang.getDate() + '/' + month3 + '/' + tanggal_sekarang.getYear()
+        let tanggal3_ = await tanggal_sekarang.getDate() + '/' + month3 + '/' + tanggal_sekarang.getFullYear()
         await tanggal_sekarang.setMonth(tanggal_sekarang.getMonth() + 1)
         let month4 =await tanggal_sekarang.getMonth()+1
-        let tanggal4_ =await tanggal_sekarang.getDate() + '/' + month4 + '/' + tanggal_sekarang.getYear()
+        let tanggal4_ =await tanggal_sekarang.getDate() + '/' + month4 + '/' + tanggal_sekarang.getFullYear()
         await tanggal_sekarang.setMonth(tanggal_sekarang.getMonth() + 1)
         let month5 =await tanggal_sekarang.getMonth()+1
-        let tanggal5_ =await tanggal_sekarang.getDate() + '/' + month5 + '/' + tanggal_sekarang.getYear()
+        let tanggal5_ =await tanggal_sekarang.getDate() + '/' + month5 + '/' + tanggal_sekarang.getFullYear()
         await tanggal_sekarang.setMonth(tanggal_sekarang.getMonth() + 1)
-        let month6 =await tanggal_sekarang.getMonth()+1
 
         await bikinFileExcel(req.body.nama_lengkap, kwitansi.no_kwitansi, req.body.tanggal_sewa, req.body.tower, req.body.lantai, tower.harga)
         await tower.save()
@@ -226,14 +225,59 @@ app.get('/tower/hasil_cari', async (req,res) => {
     res.send(tower_)
 })
 
-app.get('/tower/info', (req,res) => {
-
+app.get('/tower/update', (req, res) => {
+    res.render('update_tower')
 })
+
+app.post('/tower/update/done', async (req, res) => {
+    try {
+        const tower_update = await Tower.find({tower : req.body.tower, lantai : req.body.lantai})
+        if (req.body.hapus === 'ya') {
+            const tower_hasil_cari = Object.assign({}, tower_update)
+            console.log(tower_hasil_cari[0])
+            const tower_delete = await Tower.deleteOne({tower : req.body.tower, lantai : req.body.lantai})
+            return res.render('setelah_update_tower', {
+                tower : 'Tower ' + tower_hasil_cari[0].tower +  ' telah didelete',
+                lantai : tower_hasil_cari[0].lantai,
+                harga : tower_hasil_cari[0].harga
+            })
+        } else {
+            if (req.body.harga) {
+                tower_update.harga = req.body.harga
+            }
+
+            if (req.body.terjual) {
+                tower_update.terjual = req.body.terjual
+            }
+
+            await tower_update.save()
+
+            return res.render('setelah_update_tower', {
+                tower : tower_update.tower,
+                lantai : tower_update.lantai,
+                harga : tower_update.harga
+            })
+        }
+        
+    } catch (e) {
+        res.render('error', {
+            message : e
+        })
+    }
+})
+
+// app.get('/tower/info', (req,res) => {
+
+// })
 
 // ~~~~~~~ DATABASE EXCEL ~~~~~~~ //
 
-app.get('/excel', (req,res) => {
-    res.render('database_excel')
+// app.get('/excel', (req,res) => {
+//     res.render('database_excel')
+// })
+
+app.get('/pilih-cari', (req,res) => {
+    res.render('pilih-cari')
 })
 
 // ~~~~~~~ SERVER UP ~~~~~~~ //

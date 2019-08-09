@@ -18,10 +18,10 @@ search_form.addEventListener('submit', (e) => {
             if (data.length === 0) {
                 table.innerHTML = '<tr><th class="d-none d-sm-table-cell">NoDataExists</th></tr>'
             } else {
-                table.innerHTML = ''
+                table.innerHTML = '<tr><th class="d-none d-sm-table-cell">Nama Lahan Tower</th><th class="d-none d-sm-table-cell">Lantai</th><th class="d-none d-sm-table-cell">Harga</th><th class="d-none d-sm-table-cell">Status Terjual</th></tr>'
                 for (var key in data) {
                     // console.log(data[key])
-                    table.innerHTML = table.innerHTML + '<tr><th class="d-none d-sm-table-cell">' + data[key].tower + '</th><th class="d-none d-sm-table-cell">'+ data[key].lantai + '</th><th class="d-none d-sm-table-cell">'+ data[key].harga + '</th></tr>'
+                    table.innerHTML = table.innerHTML + '<tr><th class="d-none d-sm-table-cell">' + data[key].tower + '</th><th class="d-none d-sm-table-cell">'+ data[key].lantai + '</th><th class="d-none d-sm-table-cell">'+ data[key].harga + '</th><th class="d-none d-sm-table-cell">' + data[key].terjual + '</th></tr>'
                 }
             }
         })

@@ -1264,7 +1264,7 @@ pre code {
     justify-content: center;
     width : 30vh;
     margin-top: 10vh;
-    max-width: 33.33333333%;
+    max-width: 30vh;
   }
 
   .order-lg-first {
@@ -18626,7 +18626,8 @@ svg {
 
 .flex-hori-ver {
   display: flex;
-  align-items: space-around;
+  justify-content: space-around;
+  align-items: center;
   flex-direction: row;
 }
 
