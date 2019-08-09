@@ -21,20 +21,12 @@ app.use(express.urlencoded({
 }))
 app.use(express.json())
 
-const port = process.env.PORT || 4000 
+const port = process.env.PORT || 3000 
 
 const User = require('../src/models/user')
 const Tower = require('../src/models/tower')
 // const ExcelData = require('../src/models/exceldata')
 const kwitansi = require('../no_kwitansi.json')
-
-// var wb = xlsx.readFile('./public/excel-file/Financial-Sample.xlsx')
-// var ws = wb.Sheets['Sheet1']
-
-// var json_data = xlsx.utils.sheet_to_json(ws)
-
-// json_data.map((record) => {
-// })
 
 async function nomerKwitansi () {
     kwitansi.no_kwitansi += await 1
@@ -164,13 +156,23 @@ app.post('/users/create', async (req, res) => {
     
 })
 
+// Update user
+app.get('/users/update', (req, res) => {
+    res.render('update_user')
+})
+
 // Cari user
 app.get('/users/cari', (req, res) => {
     res.render('cari_user')
 })
 
 app.get('/users/hasil_cari', async (req,res) => {
-    const user = await User.find({nama_lengkap : req.query.nama_lengkap})
+    let user
+    if (req.query.nama_lengkap === 'semua') {
+        user = await User.find({})
+    } else {
+        user = await User.find({nama_lengkap : req.query.nama_lengkap})
+    }
     res.send(user)
 })
 
@@ -184,8 +186,10 @@ app.post('/tower/register', async (req, res) => {
     const tower = new Tower(req.body)
     try {
         await tower.save()
-        res.send({
-            message : 'Successfully created a tower data'
+        res.render('setelah_tower', {
+            tower : tower.tower,
+            lantai : tower.lantai,
+            harga : tower.harga
         })
     } catch (e) {
         res.send(e)
