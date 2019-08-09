@@ -21,7 +21,7 @@ app.use(express.urlencoded({
 }))
 app.use(express.json())
 
-const port = process.env.PORT || 3000 
+const port = process.env.PORT || 4000 
 
 const User = require('../src/models/user')
 const Tower = require('../src/models/tower')
@@ -55,8 +55,6 @@ async function bikinFileExcel (nama_lengkap, no_kwitansi, tanggal, tower, lantai
         // console.log(tanggal)
         var bulan = Number(0)
         var readDir = path.join(__dirname, '../public/excel-file/osjur.xlsx')
-        // console.log(readDir)
-        console.log(tanggal)
         var temp_osjur = xlsx.readFile(readDir)
         var temp_osjur = temp_osjur.Sheets['Sheet1']
         var json_temp = xlsx.utils.sheet_to_json(temp_osjur)
@@ -75,10 +73,10 @@ async function bikinFileExcel (nama_lengkap, no_kwitansi, tanggal, tower, lantai
         })
 
         var nama_dengan_strip = nama_lengkap.replace(/ /g, '-')
-        var tanggal_sekarang = new Date(tanggal.split('/')[2], tanggal.split('/')[1] - 1, tanggal.split('/')[0] - 30)
+        var tanggal_sekarang = new Date(tanggal.split('/')[2], tanggal.split('/')[1], tanggal.split('/')[0] - 30)
         var bulan_sekarang = tanggal_sekarang.getMonth() + 1
 
-        console.log(tanggal_sekarang.getDate() + '-' + bulan_sekarang + '-' + tanggal_sekarang.getFullYear() + '_' + tower + '_' + lantai)
+        // console.log(tanggal_sekarang.getDate() + '-' + bulan_sekarang + '-' + tanggal_sekarang.getFullYear() + '_' + tower + '_' + lantai)
 
         var newWB = xlsx.utils.book_new()
         var newWS = xlsx.utils.json_to_sheet(json_new_temp)
@@ -87,7 +85,6 @@ async function bikinFileExcel (nama_lengkap, no_kwitansi, tanggal, tower, lantai
         
         // console.log(dir)
 
-        
         xlsx.writeFile(newWB, dir)
     } catch (e) {
         console.log(e)
@@ -107,30 +104,74 @@ async function cekTower (tower) {
 
 // ~~~~~~~~ USERS ROUTER ~~~~~~~~ //
 
+// Registrasi
 app.get('/users', async (req, res) => {
     res.render('registrasi_user')
 })
 
+// Buat database dengan method POST
 app.post('/users/create', async (req, res) => {
     const user = new User(req.body)
 
     try {
         await nomerKwitansi()
         const tower = await Tower.findOne({tower : req.body.tower, lantai : req.body.lantai})
+        // console.log(tower)
         await cekTower(tower)
         await console.log(kwitansi)
+        let nama_strip = req.body.nama_lengkap.replace(/ /g, '-')
+        let tanggal_sekarang = new Date(req.body.tanggal_sewa.split('/')[2], req.body.tanggal_sewa.split('/')[1], req.body.tanggal_sewa.split('/')[0] - 30)
+ 
+        let month1 = await tanggal_sekarang.getMonth()+1
+        let tanggal1_ = await tanggal_sekarang.getDate() + '/' + month1 + '/' + tanggal_sekarang.getYear()
+        await tanggal_sekarang.setMonth(tanggal_sekarang.getMonth() + 1)
+        let month2 = await tanggal_sekarang.getMonth()+1
+        let tanggal2_ = await tanggal_sekarang.getDate() + '/' + month2 + '/' +  tanggal_sekarang.getYear()
+        await tanggal_sekarang.setMonth(tanggal_sekarang.getMonth() + 1)
+        let month3 = await tanggal_sekarang.getMonth()+1
+        let tanggal3_ = await tanggal_sekarang.getDate() + '/' + month3 + '/' + tanggal_sekarang.getYear()
+        await tanggal_sekarang.setMonth(tanggal_sekarang.getMonth() + 1)
+        let month4 =await tanggal_sekarang.getMonth()+1
+        let tanggal4_ =await tanggal_sekarang.getDate() + '/' + month4 + '/' + tanggal_sekarang.getYear()
+        await tanggal_sekarang.setMonth(tanggal_sekarang.getMonth() + 1)
+        let month5 =await tanggal_sekarang.getMonth()+1
+        let tanggal5_ =await tanggal_sekarang.getDate() + '/' + month5 + '/' + tanggal_sekarang.getYear()
+        await tanggal_sekarang.setMonth(tanggal_sekarang.getMonth() + 1)
+        let month6 =await tanggal_sekarang.getMonth()+1
+
         await bikinFileExcel(req.body.nama_lengkap, kwitansi.no_kwitansi, req.body.tanggal_sewa, req.body.tower, req.body.lantai, tower.harga)
         await tower.save()
         await user.save()
-        await res.send(user)
+        
+        await res.render('preview_hquarter', {
+            nama_file :  nama_strip + '_' + req.body.tanggal_sewa.split('/')[0] + '-' + req.body.tanggal_sewa.split('/')[1] + '-' + req.body.tanggal_sewa.split('/')[2] + '_' + req.body.tower + '_' + req.body.lantai,
+            nama_lengkap: req.body.nama_lengkap,
+            tanggal1 : tanggal1_,
+            tanggal2 : tanggal2_,
+            tanggal3 : tanggal3_,
+            tanggal4 : tanggal4_,
+            tanggal5 : tanggal5_,
+            no_kwitansi : kwitansi.no_kwitansi,
+            harga_tower : tower.harga
+        })
     } catch (error) {
         let message = error
-        await console.log(typeof(message))
-        await res.send({
+        await console.log(message)
+        await res.render('error', {
             message : 'Lahan tidak tersedia atau error internal server'
         })
     }
     
+})
+
+// Cari user
+app.get('/users/cari', (req, res) => {
+    res.render('cari_user')
+})
+
+app.get('/users/hasil_cari', async (req,res) => {
+    const user = await User.find({nama_lengkap : req.query.nama_lengkap})
+    res.send(user)
 })
 
 // ~~~~~~~ TOWER ROUTER ~~~~~~~ //
@@ -165,6 +206,10 @@ app.get('/excel', (req,res) => {
 app.get('', async (req, res) => {
     res.render('index')
 })
+
+// app.get('*', (req, res) => {
+//     res.render('pagenotfound')
+// })
 
 app.listen(port, () => {
     console.log('Server is up on port ' + port + '.')
