@@ -196,6 +196,36 @@ app.post('/tower/register', async (req, res) => {
     }
 })
 
+app.get('/tower/cari', async (req, res) => {
+    res.render('cari_tower')
+})
+
+app.get('/tower/hasil_cari', async (req,res) => {
+    let tower_
+    let tower
+    let lantai
+    if (req.query.tower === 'semua' || req.query.lantai === 'semua') {
+        tower_ = await Tower.find({})
+    } else {
+        tower = req.query.tower
+        lantai = req.query.lantai
+        if (!tower) {
+            if (!lantai) {
+                tower_ = []
+            } else {
+                tower_ = await Tower.find({lantai})
+            }
+        } else {
+            if (!lantai) {
+                tower_ = await Tower.find({tower})
+            } else {
+                tower_ = await Tower.find({tower, lantai})
+            }
+        }
+    }
+    res.send(tower_)
+})
+
 app.get('/tower/info', (req,res) => {
 
 })
